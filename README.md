@@ -60,13 +60,13 @@ A simple fundraising tracker that shows your donation progress using two windows
 If something's not working:
 1. Make sure both files are open
 2. Check that you didn't rename the files
-3. Contact [Your Name/Organization] at [Your Email/Contact Info]
+3. Contact Eyad at ea72014@gmail.com
 
 ## 📝 Free to Use
 
 This fundraising thermometer is free to use and share! Feel free to use it for all your fundraising events.
 
-Created by [Your Name/Organization]
+Created by Eyad Alrabbat
 
 ## 🙏 Credit
 
