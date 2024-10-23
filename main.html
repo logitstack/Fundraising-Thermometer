@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundraiser Input</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, button { margin: 5px; padding: 5px; }
+        .total { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Fundraiser Input</h2>
+    <div>
+        <label>Cash: <input type="number" id="cashInput" min="0" step="0.01"></label>
+        <span id="cashTotal" class="total">0</span>
+    </div>
+    <div>
+        <label>Check: <input type="number" id="checkInput" min="0" step="0.01"></label>
+        <span id="checkTotal" class="total">0</span>
+    </div>
+    <div>
+        <label>Pledges: <input type="number" id="pledgesInput" min="0" step="0.01"></label>
+        <span id="pledgesTotal" class="total">0</span>
+    </div>
+    <div>
+        <label>Square: <input type="number" id="squareInput" min="0" step="0.01"></label>
+        <span id="squareTotal" class="total">0</span>
+    </div>
+    <div>
+        <label>Website: <input type="number" id="websiteInput" min="0" step="0.01"></label>
+        <span id="websiteTotal" class="total">0</span>
+    </div>
+    <div>
+        <label>Total Collected: <span id="totalCollected" class="total">0</span></label>
+    </div>
+    <div>
+        <label>Override Total: <input type="number" id="overrideTotal" min="0" step="0.01"></label>
+        <button id="applyOverride">Apply Override</button>
+    </div>
+    <div>
+        <label>Goal: <input type="number" id="goalInput" min="0" step="0.01"></label>
+        <button id="setGoal">Set Goal</button>
+    </div>
+
+    <script>
+        let categories = ['cash', 'check', 'pledges', 'square', 'website'];
+        let totals = {};
+
+        categories.forEach(category => {
+            totals[category] = 0;
+            $(`#${category}Input`).on('change', function() {
+                let value = parseFloat($(this).val()) || 0;
+                totals[category] += value;
+                $(`#${category}Total`).text(totals[category].toFixed(2));
+                $(this).val('');
+                updateTotal();
+            });
+        });
+
+        function updateTotal() {
+            let total = Object.values(totals).reduce((a, b) => a + b, 0);
+            $('#totalCollected').text(total.toFixed(2));
+            localStorage.setItem('fundraiserTotal', total);
+        }
+
+        $('#applyOverride').on('click', function() {
+            let override = parseFloat($('#overrideTotal').val()) || 0;
+            $('#totalCollected').text(override.toFixed(2));
+            localStorage.setItem('fundraiserTotal', override);
+        });
+
+        $('#setGoal').on('click', function() {
+            let goal = parseFloat($('#goalInput').val()) || 0;
+            localStorage.setItem('fundraiserGoal', goal);
+        });
+
+        setInterval(() => {
+            let total = parseFloat(localStorage.getItem('fundraiserTotal')) || 0;
+            $('#totalCollected').text(total.toFixed(2));
+        }, 1000);
+    </script>
+</body>
+</html>
