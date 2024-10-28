@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundraiser Input</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 30px; 
+            background-color: #f5f7fa;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .input-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .input-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        label {
+            flex: 1;
+            color: #34495e;
+            font-weight: bold;
+        }
+
+        input {
+            width: 150px;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .total {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-left: 15px;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        #totalCollected {
+            font-size: 18px;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h2>Fundraiser Input</h2>
+
+    <div class="input-group">
+        <div class="section-title">Configuration</div>
+        <div class="input-row">
+            <label>Fundraiser Title:</label>
+            <input type="text" id="titleInput">
+            <button id="setTitle">Set Title</button>
+        </div>
+        <div class="input-row">
+            <label>Goal Amount:</label>
+            <input type="number" id="goalInput" min="0" step="0.01">
+            <button id="setGoal">Set Goal</button>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <div class="section-title">Donation Inputs</div>
+        <div class="input-row">
+            <label>Cash:</label>
+            <input type="number" id="cashInput" min="0" step="0.01">
+            <span id="cashTotal" class="total">$0.00</span>
+        </div>
+        <div class="input-row">
+            <label>Check:</label>
+            <input type="number" id="checkInput" min="0" step="0.01">
+            <span id="checkTotal" class="total">$0.00</span>
+        </div>
+        <div class="input-row">
+            <label>Pledges:</label>
+            <input type="number" id="pledgesInput" min="0" step="0.01">
+            <span id="pledgesTotal" class="total">$0.00</span>
+        </div>
+        <div class="input-row">
+            <label>Square:</label>
+            <input type="number" id="squareInput" min="0" step="0.01">
+            <span id="squareTotal" class="total">$0.00</span>
+        </div>
+        <div class="input-row">
+            <label>Website:</label>
+            <input type="number" id="websiteInput" min="0" step="0.01">
+            <span id="websiteTotal" class="total">$0.00</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <div class="section-title">Totals</div>
+        <div class="input-row">
+            <label>Total Collected:</label>
+            <span id="totalCollected" class="total">$0.00</span>
+        </div>
+        <div class="input-row">
+            <label>Override Total:</label>
+            <input type="number" id="overrideTotal" min="0" step="0.01">
+            <button id="applyOverride">Apply Override</button>
+        </div>
+    </div>
+
+    <script>
+        let categories = ['cash', 'check', 'pledges', 'square', 'website'];
+        let totals = {};
+
+        // Format number as currency
+        function formatCurrency(number) {
+            return '$' + number.toFixed(2);
+        }
+
+        categories.forEach(category => {
+            totals[category] = 0;
+            $(`#${category}Input`).on('change', function() {
+                let value = parseFloat($(this).val()) || 0;
+                totals[category] += value;
+                $(`#${category}Total`).text(formatCurrency(totals[category]));
+                $(this).val('');
+                updateTotal();
+            });
+        });
+
+        function updateTotal() {
+            let total = Object.values(totals).reduce((a, b) => a + b, 0);
+            $('#totalCollected').text(formatCurrency(total));
+            localStorage.setItem('fundraiserTotal', total);
+        }
+
+        $('#setTitle').on('click', function() {
+            let title = $('#titleInput').val() || '';
+            localStorage.setItem('fundraiserTitle', title);
+            $('#titleInput').val('');
+        });
+
+        $('#applyOverride').on('click', function() {
+            let override = parseFloat($('#overrideTotal').val()) || 0;
+            $('#totalCollected').text(formatCurrency(override));
+            localStorage.setItem('fundraiserTotal', override);
+            $('#overrideTotal').val('');
+        });
+
+        $('#setGoal').on('click', function() {
+            let goal = parseFloat($('#goalInput').val()) || 0;
+            localStorage.setItem('fundraiserGoal', goal);
+            $('#goalInput').val('');
+        });
+
+        setInterval(() => {
+            let total = parseFloat(localStorage.getItem('fundraiserTotal')) || 0;
+            $('#totalCollected').text(formatCurrency(total));
+        }, 1000);
+    </script>
+</body>
+</html>

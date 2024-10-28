@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundraiser Thermometer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #34495e; }
+        .thermometer-container { position: relative; width: 150px; height: 450px; }
+        .fundraiser-title { 
+            position: absolute;
+            top: -90px;
+            width: 300px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .goal { position: absolute; top: -40px; width: 100%; text-align: center; font-weight: bold; font-size: 18px; color: #fff; }
+        .thermometer {
+            display: block;
+            position: relative;
+            height: 400px;
+        }
+        .bulb {
+            display: inline-block;
+            border: 6px solid #fff;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            left: 35px;
+            bottom: 0;
+            border-top: 3px solid #fff;
+            box-shadow: 0px 0px 0px 4px #fff inset;
+            background: #e74c3c;
+        }
+        .stem {
+            display: inline-block;
+            border: 6px solid #fff;
+            width: 40px;
+            height: 320px;
+            border-radius: 22px 22px 0 0;
+            border-bottom: 3px solid transparent;
+            position: absolute;
+            bottom: 77px;
+            left: 55px;
+            box-shadow: 0px 0px 0px 4px #fff inset;
+            z-index: 10;
+            overflow: hidden;
+            background-color: transparent;
+        }
+        .stem-perct {
+            width: 34px;
+            background: #e74c3c;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            transition: height 0.5s;
+            position: absolute;
+            bottom: 0;
+            left: 3px;
+        }
+        .bulb:after {
+            content: '';
+            height: 30px;
+            width: 34px;
+            background: inherit;
+            position: absolute;
+            left: 23px;
+            bottom: 55px;
+            z-index: 12;
+        }
+        .ticks {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            height: calc(100% - 6px);
+            width: calc(100% - 6px);
+            z-index: 5;
+        }
+        .tick {
+            width: 30%;
+            height: 2px;
+            background-color: #aaa;
+            position: absolute;
+            left: 0;
+        }
+        .percentage {
+            position: absolute;
+            left: -5px;
+            background-color: #fff;
+            color: #34495e;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: bottom 0.5s;
+            bottom: 70px;
+            font-size: 12px;
+            z-index: 20;
+        }
+        .percentage::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 4px solid #fff;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        .amount {
+            position: absolute;
+            right: -25px;
+            background-color: #fff;
+            color: #34495e;
+            padding: 3px 6px 3px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: bottom 0.5s;
+            bottom: 70px;
+            font-size: 12px;
+            z-index: 20;
+            transform-origin: left center;
+            white-space: nowrap;
+        }
+        .amount::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right: 4px solid #fff;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="thermometer-container">
+        <div class="fundraiser-title" id="fundraiserTitle"></div>
+        <div class="goal">Goal: $<span id="goalAmount">0</span></div>
+        <div class="thermometer">
+            <div class="stem">
+                <div class="ticks" id="ticks"></div>
+                <div class="stem-perct"></div>
+            </div>
+            <div class="bulb"></div>
+            <div class="percentage" id="percentage">0%</div>
+            <div class="amount" id="amount">$0</div>
+        </div>
+    </div>
+
+    <script>
+        function createTicks() {
+            const ticksContainer = document.getElementById('ticks');
+            const tickCount = 20;
+            for (let i = 0; i <= tickCount; i++) {
+                const tick = document.createElement('div');
+                tick.className = 'tick';
+                tick.style.bottom = `${(i / tickCount) * 100}%`;
+                ticksContainer.appendChild(tick);
+            }
+        }
+
+        function updateThermometer() {
+            let total = parseFloat(localStorage.getItem('fundraiserTotal')) || 0;
+            let goal = parseFloat(localStorage.getItem('fundraiserGoal')) || 100000;
+            let percentage = (total / goal) * 100;
+            percentage = Math.min(percentage, 100);
+            
+            let title = localStorage.getItem('fundraiserTitle') || '';
+            $('#fundraiserTitle').text(title);
+            
+            $('.stem-perct').css('height', percentage + '%');
+            $('#goalAmount').text(goal.toLocaleString());
+            
+            // Update percentage indicator
+            $('#percentage').text(`${Math.round(percentage)}%`);
+            
+            // Update amount indicator
+            $('#amount').text('$' + total.toLocaleString());
+            
+            // Move both indicators up from their starting positions
+            let newBottom = 70 + (percentage / 100) * 320; // 320px is the height of the stem
+            $('#percentage').css('bottom', `${newBottom}px`);
+            $('#amount').css('bottom', `${newBottom}px`);
+        }
+
+        // Create ticks
+        createTicks();
+
+        // Initial update
+        updateThermometer();
+
+        // Update every second
+        setInterval(updateThermometer, 1000);
+    </script>
+</body>
+</html>
